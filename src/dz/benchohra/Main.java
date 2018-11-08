@@ -44,12 +44,16 @@ class Graph {
 
 public class Main {
 
+    int test(int a){
+        return a;
+    }
+
     public static void main(String[] args) {
 
     }
 
     ArrayList<Node> getArticulateNodes(Graph g) {
-        ArrayList<Node> acrticulationNodes = new ArrayList<>();
+        ArrayList<Node> articulationNodes = new ArrayList<>();
         ArrayList<Node> graphNodes = g.nodes;
         int n, p;
 
@@ -57,6 +61,9 @@ public class Main {
             n = BFS(e);
 
         }
+
+
+        return articulationNodes;
     }
 
     int BFS(Node v) {
