@@ -1,38 +1,28 @@
 package sample;
 
-import com.sun.javafx.geom.BaseBounds;
-import com.sun.javafx.geom.transform.BaseTransform;
-import com.sun.javafx.jmx.MXNodeAlgorithm;
-import com.sun.javafx.jmx.MXNodeAlgorithmContext;
-import com.sun.javafx.sg.prism.NGNode;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
-import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.Node;
-import javafx.scene.Cursor;
 import javafx.scene.shape.Line;
-
-import java.awt.*;
 import java.net.URL;
 import java.util.ResourceBundle;
+
 
 public class Controller implements Initializable {
     @FXML
     private AnchorPane background;
-    public static int i = 0;
-    private static boolean src;
     @FXML
-    public void createNode(double x, double y){
-        final int[] lineId = {0,0};
+    private ScrollPane scroll;
+    private static int nbNodes = 0;
+    private static boolean src;
+    private static boolean arrangeable=true;
+    @FXML
+    private void createNode(double x, double y){
         Circle newCircle = new Circle();
         newCircle.setCenterX(x);
         newCircle.setCenterY(y);
@@ -41,8 +31,8 @@ public class Controller implements Initializable {
         newCircle.setVisible(true);
         newCircle.setDisable(false);
             newCircle.setOnMouseClicked(event1 -> {
-                if (src) src=false;
-                else src =true;
+                   arrangeable=false;
+                     src = (!src) ;
                 if (src) {
                     System.out.println("proceding to creat Link");
                 Line newLine = new Line();
@@ -64,7 +54,7 @@ public class Controller implements Initializable {
                     background.setOnMouseMoved(event -> {});
                     Circle thisCircle = (Circle) event1.getSource();
                     Line existingLine ;
-                    int a= (int)background.getChildren().size();
+                    int a= background.getChildren().size();
                     existingLine= (Line)background.getChildren().get(a-1);
                     existingLine.setEndX(thisCircle.getCenterX());
                     existingLine.setEndY(thisCircle.getCenterY());
@@ -72,65 +62,85 @@ public class Controller implements Initializable {
                     background.getChildren().set(a-1,existingLine);
 
                 }
-            });
-        background.getChildren().add(newCircle);
 
+            }
+
+            );
+        background.getChildren().add(newCircle);
+++nbNodes;
         System.out.println(background.getChildren());
 
     }
     @FXML
-    public void arrangeNode(){
-        int k=0;
-        Circle classType = new Circle();
-        while (background.getChildren().get(k).getClass()==classType.getClass()){
-            k++;
-        }
-       // background.getChildren().get(0).setLayoutX(background.getChildren().get(0).getLayoutX()+);
-        while (background.getChildren().get(k).getClass()==classType.getClass()){
-         //   background.getChildren().get(k).setLayoutX(background.getChildren().get(k).getLayoutX()+);
+    private void arrangeNode(){
+        if (arrangeable) {
+            int k = 0;
+            int l = 0;
+            Circle tempCircle;
+            System.out.println("*** here is the number of nodes" + nbNodes + " *** \n");
+            if (nbNodes > 11) {
+                System.out.println("resizing");
+                background.setMinHeight(60 * nbNodes);
+                background.setMinWidth(60 * nbNodes);
+                background.setPrefWidth(60 * nbNodes);
+                background.resize(60 * nbNodes, 60 * nbNodes);
+                System.out.println(background.getWidth() + "the size of window" + background.getHeight() + "\n");
+
+            }
+            scroll.setContent(background);
+            scroll.setPannable(true);
+            while (l < background.getChildren().size()) {
+                if (background.getChildren().get(l) instanceof Circle) {
+                    tempCircle = ((Circle) background.getChildren().get(l));
+                    tempCircle.setCenterX(Math.max(background.getScene().getWindow().getWidth() / 2 - 21 * nbNodes, 0) + 21 * nbNodes + 13 + 21 * nbNodes * Math.cos(k * 2 * Math.PI / nbNodes));
+                    tempCircle.setCenterY(21 * nbNodes + 13 - 21 * nbNodes * Math.sin(k * 2 * Math.PI / nbNodes));
+                    //System.out.println(tempCircle.getCenterX()+"this for x, and for y :"+tempCircle.getCenterY()+"\n \n");
+                    background.getChildren().set(l, tempCircle);
+                    k++;
+
+                }
+                l++;
+            }
+
+
         }
     }
     @FXML
-    public void showMenu(double x, double y){
+    private void showMenu(double x, double y, double xx, double yy){
         MenuBar newMenuBar = new MenuBar();
         ContextMenu newMenu = new ContextMenu();
         MenuItem newMenuItem = new MenuItem();
+        MenuItem newMenuItem2 = new MenuItem();
         newMenuItem.setText("Create Node");
-        newMenuItem.setOnAction(event -> {createNode(x,y);});
-        newMenu.getItems().add(newMenuItem);
+        newMenuItem.setOnAction(event -> createNode(x,y));
+        newMenu.getItems().add(0,newMenuItem);
+        newMenuItem2.setText("reorganize node");
+        newMenuItem2.setOnAction(event -> {
+            arrangeNode();
+            arrangeNode();
+        });
+        if (!arrangeable)
+            newMenuItem2.setDisable(true);
+        newMenu.getItems().add(1,newMenuItem2);
         newMenuBar.setLayoutX(x);
         newMenuBar.setLayoutY(y);
         newMenuBar.setContextMenu(newMenu);
         newMenuBar.setVisible(false);
         newMenuBar.setDisable(false);
         background.getChildren().add(newMenuBar);
-            newMenu.show(background,x,y);
+        newMenu.show(background,xx,yy);
         System.out.println(background.onMouseClickedProperty().toString());
 
-        System.out.println(newMenu);
+        System.out.println(newMenu.getX()+"*******"+newMenu.getY());
 
     }
-    @FXML
-   /* public void linkTwoNodes(){
-        if (src){
-            background.setOnMouseMoved(event -> {
-                Line newLine= new Line();
-                newLine.setStartX(background.getChildren().get());
-
-            });
-        }
-        else {}
-    }*/
-
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        background.setOnContextMenuRequested(new EventHandler<ContextMenuEvent>() {
-            @Override
-            public void handle(ContextMenuEvent event3) {
-                System.out.println(event3.getX()+"and "+ event3.getY());
-                showMenu(event3.getX(), event3.getY());
-            }
-        });
+
+        background.setOnContextMenuRequested(event3 -> {
+                System.out.println(event3.getSceneX()+"and "+ event3.getSceneY()+"versus "+event3.getX()+"and "+ event3.getY());
+                showMenu(event3.getX(), event3.getY(),event3.getScreenX(), event3.getScreenY());
+             });
 
 
     }
