@@ -95,6 +95,7 @@ public class Controller implements Initializable {
                 existingLine.setEndX(newCircle.getCenterX());
                 existingLine.setEndY(newCircle.getCenterY());
                 existingLine.setManaged(false);
+                existingLine.toBack();
                 background.getChildren().set(a-1,existingLine);
                     graph.setAdjMat(lineSrc,lineDes,1);
                     graph.setAdjMat(lineDes,lineSrc,1);
@@ -159,7 +160,7 @@ public class Controller implements Initializable {
             else {background.getChildren().add(nodeInfoPane); return background.getChildren().indexOf(nodeInfoPane);}
         }
         else {
-            if (precedInfoId!=1) background.getChildren().remove(precedInfoId);
+            if (precedInfoId!=-1) background.getChildren().remove(precedInfoId);
             return -1;
         }
     }
@@ -305,6 +306,7 @@ public class Controller implements Initializable {
                 validated =false;
                 validate.setDisable(false);
                 arrangeable = true;
+                nodeInfoIndex =-1;
 
         });
         validate.setVisible(false);
