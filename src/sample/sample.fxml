@@ -4,11 +4,21 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.AnchorPane?>
 
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.effect.Shadow?>
 <ScrollPane fx:id="scroll" maxHeight="Infinity" maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="Infinity" prefWidth="Infinity" xmlns="http://javafx.com/javafx/8.0.102" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
    <content>
-      <AnchorPane fx:id="background" maxHeight="Infinity" maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700" prefWidth="1300">
+      <AnchorPane fx:id="backbackground" maxHeight="Infinity" maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="750" prefWidth="1350" style="-fx-background-color: #3723ff;">
          <children>
-            <JFXButton fx:id="validate" text="ValidateGraph" />
-         </children></AnchorPane>
+            <AnchorPane fx:id="background" maxHeight="Infinity" maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400" prefWidth="650" AnchorPane.bottomAnchor="150.0" AnchorPane.leftAnchor="225.0" AnchorPane.rightAnchor="225.0" AnchorPane.topAnchor="150.0" style="-fx-background-color: #ffffff; -fx-background-radius: 15;  " >
+                <effect>
+                    <DropShadow color="#4043ff" width="30" offsetX="10" offsetY="10"  ></DropShadow>
+                </effect>
+               <children>
+                  <JFXButton fx:id="validate" text="ValidateGraph" />
+               </children>
+            </AnchorPane>
+         </children>
+      </AnchorPane>
    </content>
 </ScrollPane>

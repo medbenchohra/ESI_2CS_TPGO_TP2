@@ -3,6 +3,7 @@ package sample;
 import com.jfoenix.controls.JFXButton;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.scene.AccessibleRole;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -10,6 +11,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Background;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
@@ -56,6 +58,8 @@ public class Controller implements Initializable {
     private static int nodeInfoIndex =-1;
     private Graph graph;
     @FXML
+    private AnchorPane backbackground;
+    @FXML
     private void validateGraph(){
         graph = new Graph(nbNodes);
         validated = true;
@@ -95,7 +99,6 @@ public class Controller implements Initializable {
                 existingLine.setEndX(newCircle.getCenterX());
                 existingLine.setEndY(newCircle.getCenterY());
                 existingLine.setManaged(false);
-                existingLine.toBack();
                 background.getChildren().set(a-1,existingLine);
                     graph.setAdjMat(lineSrc,lineDes,1);
                     graph.setAdjMat(lineDes,lineSrc,1);
@@ -154,14 +157,28 @@ public class Controller implements Initializable {
             infoNode.setPrefSize(210,66);
             nodeInfoPane.setPrefSize(210,66);
             nodeInfoPane.getChildren().add(infoNode);
-            nodeInfoPane.setLayoutX(background.getParent().getScene().getWindow().getWidth()-210);
-            nodeInfoPane.setLayoutY(0);
-            if (precedInfoId!=-1) {background.getChildren().set(precedInfoId,nodeInfoPane);return precedInfoId;}
-            else {background.getChildren().add(nodeInfoPane); return background.getChildren().indexOf(nodeInfoPane);}
+            nodeInfoPane.setLayoutX(backbackground.getParent().getScene().getWindow().getWidth()-260);
+            nodeInfoPane.setLayoutY(285);
+            if (precedInfoId!=-1) {backbackground.getChildren().set(precedInfoId,nodeInfoPane);return precedInfoId;}
+            else {backbackground.getChildren().add(nodeInfoPane); return backbackground.getChildren().indexOf(nodeInfoPane);}
         }
         else {
-            if (precedInfoId!=-1) background.getChildren().remove(precedInfoId);
-            return -1;
+            AnchorPane nodeInfoPane = new AnchorPane();
+            TextArea infoNode = new TextArea();
+            infoNode.setText(" *Nothing to show * ");
+            infoNode.setFont(new Font(15));
+            infoNode.setCenterShape(true);
+            infoNode.setPrefSize(210,66);
+            nodeInfoPane.setPrefSize(210,66);
+            nodeInfoPane.getChildren().add(infoNode);
+            nodeInfoPane.setLayoutX(backbackground.getParent().getScene().getWindow().getWidth()-260);
+            nodeInfoPane.setLayoutY(285);
+            if (precedInfoId!=-1) {
+                backbackground.getChildren().set(precedInfoId,nodeInfoPane);return precedInfoId;
+
+            }
+            else backbackground.getChildren().add(nodeInfoPane); return backbackground.getChildren().indexOf(nodeInfoPane);
+
         }
     }
     @FXML
@@ -211,7 +228,12 @@ public class Controller implements Initializable {
                 background.resize(60 * nbNodes, 60 * nbNodes);
 
             }
-            scroll.setContent(background);
+            scroll.setContent(backbackground);
+            background.setPrefSize(500,500);
+            background.setLayoutX(500);
+            background.setLayoutY(150);
+            background.setPadding(new Insets(100,150,100,150));
+            backbackground.getChildren().set(0,background);
             scroll.setPannable(true);
             while (l < background.getChildren().size()) {
                 if (background.getChildren().get(l) instanceof Circle) {
@@ -282,9 +304,13 @@ public class Controller implements Initializable {
         });
 
 
-        JFXButton articule = new JFXButton("ARTICULE");
-        articule.setLayoutY(30);
-        background.getChildren().add(articule);
+        JFXButton articule = new JFXButton("GET ARTICULATED POINT");
+        articule.setLayoutY(630);
+        articule.setLayoutX(250);
+        articule.setRipplerFill(Color.WHITE);
+        articule.setFont(Font.font(15));
+        articule.setStyle("-fx-background-color: WHITE;");
+        backbackground.getChildren().add(articule);
         articule.setOnAction(event ->
         {
             if (!validated) validateGraph();
@@ -302,7 +328,7 @@ public class Controller implements Initializable {
         reset.setLayoutY(60);
         background.getChildren().add(reset);
         reset.setOnAction(event -> {
-                background.getChildren().remove(4,background.getChildren().size());
+                background.getChildren().remove(3,background.getChildren().size());
                 validated =false;
                 validate.setDisable(false);
                 arrangeable = true;
