@@ -3,6 +3,9 @@ package sample;
 import com.jfoenix.controls.JFXButton;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.AccessibleRole;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -10,6 +13,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -46,11 +52,12 @@ public class Controller implements Initializable {
     private static int lineSrc =0;
     private static int lineDes =0;
     private static boolean validated = false;
+    private static boolean isLineDrawable = false;
+    private static int nodeInfoIndex =-1;
     private Graph graph;
     @FXML
     private void validateGraph(){
         graph = new Graph(nbNodes);
-        System.out.println("surprise \n "+graph);
         validated = true;
 
     };
@@ -58,9 +65,7 @@ public class Controller implements Initializable {
     private void GraphiclinkTwoNodes(Circle newCircle, boolean linkeable){
         if (linkeable){arrangeable=false;
             if (src) {
-                System.out.println("proceding to creat Link");
                 lineSrc=graphicToLogicNode(background.getChildren().indexOf(newCircle));
-                System.out.println("step1"+lineSrc+"\n");
                 Line newLine = new Line();
                 newLine.setStartX(newCircle.getCenterX());
                 newLine.setStartY(newCircle.getCenterY());
@@ -69,7 +74,6 @@ public class Controller implements Initializable {
                 newLine.setVisible(true);
                 newLine.setFill(new Color(0,0,0,1));
                 background.getChildren().add(newLine);
-                System.out.println("new line created");
                 background.setOnMouseMoved(event2 -> {
                     newLine.setEndX(event2.getScreenX());
                     newLine.setEndY(event2.getScreenY());
@@ -79,33 +83,26 @@ public class Controller implements Initializable {
                 });
             } else {
                 lineDes=graphicToLogicNode(background.getChildren().indexOf(newCircle));
-                System.out.println(graphicToLogicNode(background.getChildren().indexOf(newCircle))+"//////"+ graphicToLogicNode(background.getChildren().indexOf(newCircle))+ "\n \n \n ***");
-                System.out.println(((graph.getAdjMat(Math.max(lineSrc,lineDes),Math.min(lineSrc,lineDes)))==0) +" /* "+Math.max(lineSrc,lineDes)+" /*"+Math.min(lineSrc,lineDes));
 
                 if ((graph.getAdjMat(Math.max(lineSrc,lineDes),Math.min(lineSrc,lineDes))==0)&&(lineSrc!= lineDes))
                 {
                     background.setOnMouseMoved(event -> {});
 
-                System.out.println("step1"+lineSrc+"\n step2"+lineDes+"\n");
                     graph.logicLinkNodes(lineSrc,lineDes);
-                    System.out.println("done !!!");
                 Line existingLine ;
                 int a= background.getChildren().size();
-                    System.out.println(background.getChildren().get(a-1));
                 existingLine= (Line)background.getChildren().get(a-1);
                 existingLine.setEndX(newCircle.getCenterX());
                 existingLine.setEndY(newCircle.getCenterY());
                 existingLine.setManaged(false);
-                    System.out.println(existingLine.getStartX()+existingLine.getEndX()+"what does it mean ? ");
                 background.getChildren().set(a-1,existingLine);
                     graph.setAdjMat(lineSrc,lineDes,1);
                     graph.setAdjMat(lineDes,lineSrc,1);
-                    System.out.println(graph.getAdjMat(Math.max(lineSrc,lineDes),Math.min(lineSrc,lineDes)));
+                    System.out.println("** done "+lineSrc+""+lineDes+""+graph.getAdjMat(lineSrc,lineDes)+""+graph.getAdjMat(lineDes,lineSrc));
 
                 }
                 else {
                     int a= background.getChildren().size();
-                    System.out.println(background.getChildren().get(a-1));
                     background.getChildren().remove(a-1);
 
                 }
@@ -141,6 +138,32 @@ public class Controller implements Initializable {
         return k;
     }
     @FXML
+    private int nodeInfo(int circleLogicId, boolean readOnly, int precedInfoId){
+        int degree = 0;
+        if (readOnly){
+            if (circleLogicId==0){
+                for (int o=0;o<graph.getSize();o++) if (graph.getAdjMat(o,circleLogicId)==1) degree++;
+            }
+            else for (int o=0;o<graph.getSize();o++) if (graph.getAdjMat(circleLogicId,o)==1) degree++;
+            AnchorPane nodeInfoPane = new AnchorPane();
+            TextArea infoNode = new TextArea();
+            infoNode.setText(" *** Node : "+circleLogicId +" *** \nDegree :"+ degree +"\n ");
+            infoNode.setFont(new Font(15));
+            infoNode.setCenterShape(true);
+            infoNode.setPrefSize(210,66);
+            nodeInfoPane.setPrefSize(210,66);
+            nodeInfoPane.getChildren().add(infoNode);
+            nodeInfoPane.setLayoutX(background.getParent().getScene().getWindow().getWidth()-210);
+            nodeInfoPane.setLayoutY(0);
+            if (precedInfoId!=-1) {background.getChildren().set(precedInfoId,nodeInfoPane);return precedInfoId;}
+            else {background.getChildren().add(nodeInfoPane); return background.getChildren().indexOf(nodeInfoPane);}
+        }
+        else {
+            if (precedInfoId!=1) background.getChildren().remove(precedInfoId);
+            return -1;
+        }
+    }
+    @FXML
     private void createNode(double x, double y){
         Circle newCircle = new Circle();
         newCircle.setCenterX(x);
@@ -153,12 +176,24 @@ public class Controller implements Initializable {
         newCircle.setOnMouseClicked(event1 -> {
                     validate.fire();
                     validate.setDisable(true);
-                    GraphiclinkTwoNodes(newCircle,validated);}
+                    GraphiclinkTwoNodes(newCircle,validated&&isLineDrawable);
+                    nodeInfoIndex =nodeInfo(graphicToLogicNode(background.getChildren().indexOf(newCircle)),!isLineDrawable,nodeInfoIndex);
+
+
+        }
 
             );
+        Text nodeName =new Text();
         background.getChildren().add(newCircle);
-++nbNodes;
-        System.out.println(background.getChildren());
+        nodeName.setText(String.valueOf(graphicToLogicNode(background.getChildren().size()-1)));
+        nodeName.setX(newCircle.getCenterX()-4);
+        nodeName.setY(newCircle.getCenterY()+4);
+        nodeName.setFont(new Font(15));
+        nodeName.setFill(new Color(0,0,0,1));
+        nodeName.toBack();
+        nodeName.setMouseTransparent(true);
+        background.getChildren().add(nodeName);
+        ++nbNodes;
 
     }
     @FXML
@@ -167,14 +202,12 @@ public class Controller implements Initializable {
             int k = 0;
             int l = 0;
             Circle tempCircle;
-            System.out.println("*** here is the number of nodes" + nbNodes + " *** \n");
+            Text tempText;
             if (nbNodes > 11) {
-                System.out.println("resizing");
                 background.setMinHeight(60 * nbNodes);
                 background.setMinWidth(60 * nbNodes);
                 background.setPrefWidth(60 * nbNodes);
                 background.resize(60 * nbNodes, 60 * nbNodes);
-                System.out.println(background.getWidth() + "the size of window" + background.getHeight() + "\n");
 
             }
             scroll.setContent(background);
@@ -184,8 +217,13 @@ public class Controller implements Initializable {
                     tempCircle = ((Circle) background.getChildren().get(l));
                     tempCircle.setCenterX(Math.max(background.getScene().getWindow().getWidth() / 2 - 21 * nbNodes, 0) + 21 * nbNodes + 13 + 21 * nbNodes * Math.cos(k * 2 * Math.PI / nbNodes));
                     tempCircle.setCenterY(21 * nbNodes + 13 - 21 * nbNodes * Math.sin(k * 2 * Math.PI / nbNodes));
-                    //System.out.println(tempCircle.getCenterX()+"this for x, and for y :"+tempCircle.getCenterY()+"\n \n");
                     background.getChildren().set(l, tempCircle);
+                    tempText= (Text)background.getChildren().get(l+1);
+                    tempText.setX(tempCircle.getCenterX()-4);
+                    tempText.setY(tempCircle.getCenterY()+4);
+                    background.getChildren().set(l+1, tempText);
+
+
                     k++;
 
                 }
@@ -221,17 +259,57 @@ public class Controller implements Initializable {
         newMenuBar.setDisable(false);
         background.getChildren().add(newMenuBar);
         newMenu.show(background,xx,yy);
-        System.out.println(background.onMouseClickedProperty().toString());
 
-        System.out.println(newMenu.getX()+"*******"+newMenu.getY());
+
+    }
+    @FXML
+    private void testDfs(){
 
     }
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
+        JFXButton edit = new JFXButton("DRAWING ARCS");
+        edit.setLayoutY(90);
+        background.getChildren().add(edit);
+        edit.setOnAction(event -> {
+            isLineDrawable = !isLineDrawable;
+            if (isLineDrawable) edit.setText("STOP DRAWING ARCS");
+            else edit.setText("DRAWING ARCS");
+            background.getChildren().set(background.getChildren().indexOf(edit),edit);
+
+        });
+
+
+        JFXButton articule = new JFXButton("ARTICULE");
+        articule.setLayoutY(30);
+        background.getChildren().add(articule);
+        articule.setOnAction(event ->
+        {
+            if (!validated) validateGraph();
+            for (int b=0; b<nbNodes;b++){
+            if (graph.articulatePoint(b)){
+                Circle editedCircle = ((Circle)background.getChildren().get(logicToGraphicNode(b)));
+                editedCircle.setFill(new Color(1,0,0,1));
+                background.getChildren().set(logicToGraphicNode(b),editedCircle);
+            }
+        }
+        graph.setNbVisitedNodes(0);
+
+        });
+        JFXButton reset = new JFXButton("RESET");
+        reset.setLayoutY(60);
+        background.getChildren().add(reset);
+        reset.setOnAction(event -> {
+                background.getChildren().remove(4,background.getChildren().size());
+                validated =false;
+                validate.setDisable(false);
+                arrangeable = true;
+
+        });
+        validate.setVisible(false);
         validate.setOnAction(event -> validateGraph());
         background.setOnContextMenuRequested(event3 -> {
-                System.out.println(event3.getSceneX()+"and "+ event3.getSceneY()+"versus "+event3.getX()+"and "+ event3.getY());
                 showMenu(event3.getX(), event3.getY(),event3.getScreenX(), event3.getScreenY(),validated);
              });
 
