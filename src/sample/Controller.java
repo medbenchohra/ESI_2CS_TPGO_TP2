@@ -260,11 +260,7 @@ public class Controller implements Initializable {
     private void showMenu(double x, double y, double xx, double yy, boolean validated){
         MenuBar newMenuBar = new MenuBar();
         ContextMenu newMenu = new ContextMenu();
-        MenuItem newMenuItem = new MenuItem();
         MenuItem newMenuItem2 = new MenuItem();
-        newMenuItem.setText("Create Node");
-        newMenuItem.setOnAction(event -> createNode(x,y));
-        newMenu.getItems().add(0,newMenuItem);
         newMenuItem2.setText("reorganize node");
         newMenuItem2.setOnAction(event -> {
             arrangeNode();
@@ -272,9 +268,7 @@ public class Controller implements Initializable {
         });
         if (!arrangeable)
             newMenuItem2.setDisable(true);
-        if (validated)
-            newMenuItem.setDisable(true);
-        newMenu.getItems().add(1,newMenuItem2);
+        newMenu.getItems().add(0,newMenuItem2);
         newMenuBar.setLayoutX(x);
         newMenuBar.setLayoutY(y);
         newMenuBar.setContextMenu(newMenu);
@@ -292,14 +286,27 @@ public class Controller implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
+        JFXButton createNodeButton = new JFXButton();
+        createNodeButton.setText("Create Node");
+        createNodeButton.setLayoutX(250);
+        createNodeButton.setLayoutY(118);
+        createNodeButton.setRipplerFill(Color.WHITE);
+        createNodeButton.setFont(Font.font(15));
+        createNodeButton.setStyle("-fx-background-color: WHITE;-fx-background-radius: 10; -fx-border-color: ORANGE; -fx-border-radius: 10;");
+        createNodeButton.setOnAction(event -> {createNodeButton.setText("Creating Node ..."); createNodeButton.setDisable(true);background.setOnMouseClicked(event3 -> {createNode(event3.getX(),event3.getY());createNodeButton.setDisable(false);createNodeButton.setText("Create Node");background.setOnMouseClicked(event1 -> {});});});
+        backbackground.getChildren().add(createNodeButton);
+
         JFXButton edit = new JFXButton("DRAWING ARCS");
-        edit.setLayoutY(90);
-        background.getChildren().add(edit);
+        edit.setLayoutX(362);
+        edit.setLayoutY(118);
+        edit.setFont(Font.font(15));
+        edit.setStyle("-fx-background-color: WHITE;-fx-background-radius: 10; -fx-border-color: ORANGE; -fx-border-radius: 10;");
+        backbackground.getChildren().add(edit);
         edit.setOnAction(event -> {
             isLineDrawable = !isLineDrawable;
-            if (isLineDrawable) edit.setText("STOP DRAWING ARCS");
+            if (isLineDrawable) {edit.setText("STOP DRAWING ARCS"); edit.setStyle("-fx-background-color: WHITE;-fx-background-radius: 10; -fx-border-color: ORANGE; -fx-border-radius: 10;");
+                }
             else edit.setText("DRAWING ARCS");
-            background.getChildren().set(background.getChildren().indexOf(edit),edit);
 
         });
 
@@ -309,6 +316,7 @@ public class Controller implements Initializable {
         articule.setLayoutX(250);
         articule.setRipplerFill(Color.WHITE);
         articule.setFont(Font.font(15));
+
         articule.setStyle("-fx-background-color: WHITE;");
         backbackground.getChildren().add(articule);
         articule.setOnAction(event ->
@@ -325,18 +333,24 @@ public class Controller implements Initializable {
 
         });
         JFXButton reset = new JFXButton("RESET");
-        reset.setLayoutY(60);
-        background.getChildren().add(reset);
+        reset.setLayoutX(1060);
+        reset.setLayoutY(118);
+        reset.setFont(Font.font(15));
+        reset.setStyle("-fx-background-color: WHITE;-fx-background-radius: 10; -fx-border-color: ORANGE; -fx-border-radius: 10;");
+        backbackground.getChildren().add(reset);
         reset.setOnAction(event -> {
-                background.getChildren().remove(3,background.getChildren().size());
+                background.getChildren().remove(1,background.getChildren().size());
                 validated =false;
                 validate.setDisable(false);
                 arrangeable = true;
                 nodeInfoIndex =-1;
+                createNodeButton.setDisable(false);
+                createNodeButton.setVisible(true);
+                backbackground.getChildren().set(backbackground.getChildren().indexOf(edit),edit);
 
         });
         validate.setVisible(false);
-        validate.setOnAction(event -> validateGraph());
+        validate.setOnAction(event -> {validateGraph(); createNodeButton.setDisable(true);});
         background.setOnContextMenuRequested(event3 -> {
                 showMenu(event3.getX(), event3.getY(),event3.getScreenX(), event3.getScreenY(),validated);
              });
